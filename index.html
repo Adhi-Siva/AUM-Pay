@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AUM Pay – Multi-Mode Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:linear-gradient(135deg,#090C37 0%,#0E1355 52%,#080C3B 100%);font-family:system-ui,-apple-system,sans-serif;color:#fff}
+:root{
+  --tl:#1D9E75;--tllt:rgba(29,158,117,0.16);--tlbd:rgba(29,158,117,0.38);--tltx:#7dd3c0;
+  --rd:#E24B4A;--rdlt:rgba(226,75,74,0.14);--rdbd:rgba(226,75,74,0.35);--rdtx:#F09595;
+  --am:#BA7517;--amlt:rgba(186,117,23,0.14);--ambd:rgba(186,117,23,0.35);--amtx:#EF9F27;
+  --bl:#378ADD;--bllt:rgba(55,138,221,0.14);--blbd:rgba(55,138,221,0.35);--bltx:#85B7EB;
+  --w1:rgba(255,255,255,0.07);--w2:rgba(255,255,255,0.12);--w3:rgba(255,255,255,0.22);
+  --w4:rgba(255,255,255,0.45);--w5:rgba(255,255,255,0.72);
+  --bd:rgba(255,255,255,0.1);
+}
+/* ── layout ── */
+.root{display:grid;grid-template-columns:220px 1fr;gap:14px;padding:14px;min-height:100vh;max-width:1100px;margin:0 auto}
+/* ── PHONE ── */
+.phone{background:#10143f;border-radius:22px;border:1.5px solid rgba(255,255,255,0.13);display:flex;flex-direction:column;min-height:620px;overflow:hidden}
+.ph-notch{height:22px;background:#080c32;display:flex;align-items:center;justify-content:center}
+.ph-bar{width:54px;height:4px;background:rgba(255,255,255,0.14);border-radius:2px}
+.ph-status{background:#080c32;padding:5px 12px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid var(--bd)}
+.ph-numtxt{font-size:10px;color:var(--tltx);font-weight:600}
+.ph-icons{font-size:9px;color:var(--w4)}
+.ph-body{flex:1;display:flex;flex-direction:column;padding:10px 9px;overflow:hidden}
+.ph-apphdr{font-size:10px;font-weight:600;color:var(--w5);padding-bottom:8px;border-bottom:0.5px solid var(--bd);margin-bottom:10px;text-align:center;letter-spacing:.3px}
+.ph-feed{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.sms{background:var(--w1);border:0.5px solid var(--bd);border-radius:10px 10px 10px 2px;padding:10px 10px 8px;font-size:10px;color:#fff;line-height:1.7}
+.sms.new{background:var(--tllt);border-color:var(--tlbd);animation:fi .4s ease}
+.sms-sender{font-size:9px;color:var(--tltx);font-weight:600;margin-bottom:2px}
+.sms-ts{font-size:9px;color:var(--w4);margin-bottom:3px}
+.code-big{font-size:22px;font-weight:700;color:#fff;letter-spacing:7px;display:block;text-align:center;margin:6px 0 2px;font-family:monospace}
+.ph-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--w4);font-size:10px;text-align:center;padding:20px}
+.ph-empty-ico{font-size:28px;opacity:.3}
+.ph-audit{font-size:8.5px;color:var(--w3);font-family:monospace;padding:7px 9px;background:rgba(0,0,0,0.25);border-top:0.5px solid var(--bd);max-height:80px;overflow-y:auto;line-height:1.9;white-space:pre-wrap;flex-shrink:0}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* ── ATM shell ── */
+.atm{background:#10143f;border-radius:16px;border:1.5px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;overflow:hidden;min-height:620px}
+.atm-hdr{background:#0b1038;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--bd);flex-shrink:0}
+.atm-logo{font-size:12px;font-weight:700;color:var(--tltx);letter-spacing:.5px}
+.atm-meta{display:flex;gap:10px;align-items:center}
+.lang-sel{background:rgba(255,255,255,0.06);border:0.5px solid var(--bd);color:var(--w4);font-size:9px;border-radius:5px;padding:3px 5px;cursor:pointer;outline:none}
+.atm-step-lbl{font-size:9px;color:var(--w4)}
+.idle-bar{height:2px;background:rgba(255,255,255,0.06);flex-shrink:0}
+.idle-fill{height:100%;background:var(--am);transition:width 1s linear}
+.atm-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:16px 14px 14px;overflow-y:auto}
+/* ── screens ── */
+.scr{display:none;flex-direction:column;align-items:center;width:100%}
+.scr.on{display:flex}
+.atm-t{font-size:17px;font-weight:600;color:#fff;text-align:center;margin-bottom:5px;line-height:1.3}
+.atm-s{font-size:11px;color:var(--w4);text-align:center;margin-bottom:16px;line-height:1.65}
+.card{background:var(--w1);border:0.5px solid var(--bd);border-radius:11px;padding:15px;width:100%}
+/* ── step dots ── */
+.steps{display:flex;gap:4px;margin-bottom:15px;flex-wrap:wrap;justify-content:center}
+.sd{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.sd.on{background:var(--tl)}.sd.dn{background:rgba(29,158,117,0.32)}
+/* ── buttons ── */
+.btn{width:100%;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;margin-top:7px;transition:all .13s;letter-spacing:.2px}
+.bp{background:var(--tl);color:#fff}.bp:hover{background:#0f6e56}.bp:active{transform:scale(.98)}
+.bs{background:var(--w1);color:var(--w5);border:0.5px solid var(--bd)}.bs:hover{background:var(--w2)}
+.bd2{background:var(--rdlt);color:var(--rdtx);border:0.5px solid var(--rdbd)}.bd2:hover{background:rgba(226,75,74,0.22)}
+.bb{background:var(--bllt);color:var(--bltx);border:0.5px solid var(--blbd)}.bb:hover{background:rgba(55,138,221,0.22)}
+/* ── numpad ── */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
+.numpad button{padding:11px;background:var(--w1);border:0.5px solid var(--bd);border-radius:7px;font-size:15px;font-weight:600;color:#fff;cursor:pointer}.numpad button:hover{background:var(--w2)}.numpad button:active{transform:scale(.96)}
+.disp{background:rgba(0,0,0,0.32);border:0.5px solid var(--bd);border-radius:7px;padding:10px 13px;font-size:17px;font-weight:600;color:#fff;letter-spacing:3px;min-height:44px;margin-bottom:9px;font-family:monospace}
+/* ── auth mode selector ── */
+.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.auth-opt{padding:14px 6px;background:var(--w1);border:0.5px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;transition:all .15s}
+.auth-opt:hover,.auth-opt.sel{background:var(--tllt);border-color:var(--tlbd)}
+.auth-ico{font-size:20px;display:block;margin-bottom:5px}
+.auth-lbl{font-size:10px;font-weight:600;color:#fff}
+.auth-sub{font-size:9px;color:var(--w4);margin-top:2px}
+/* ── passcode options ── */
+.pc-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:10px}
+.pc-opt{padding:16px 6px;background:var(--w1);border:0.5px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;transition:all .15s}
+.pc-opt:hover{background:var(--tllt);border-color:var(--tlbd);transform:translateY(-1px)}
+.pc-opt-val{font-size:26px;font-weight:700;color:#fff;font-family:monospace}
+.pc-opt-lbl{font-size:9px;color:var(--w4);margin-top:4px}
+/* ── timer ── */
+.timer-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.t-label{font-size:10px;color:var(--w4);white-space:nowrap}
+.t-bar{flex:1;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+.t-fill{height:100%;border-radius:2px;transition:width .95s linear}
+.t-num{font-size:11px;font-weight:700;min-width:22px;text-align:right}
+/* ── retry dots ── */
+.rdots{display:flex;gap:6px;justify-content:center;margin-bottom:9px}
+.rdot{width:9px;height:9px;border-radius:50%;background:var(--w1);border:0.5px solid var(--bd);transition:all .2s}
+.rdot.used{background:var(--rdlt);border-color:var(--rdbd)}
+/* ── OTP boxes ── */
+.otp-row{display:flex;gap:7px;justify-content:center;margin-bottom:12px}
+.otp-b{width:38px;height:48px;background:var(--w1);border:0.5px solid var(--bd);border-radius:8px;font-size:18px;font-weight:700;color:#fff;text-align:center;outline:none;font-family:monospace}
+.otp-b:focus{border-color:var(--tl)}
+/* ── PIN boxes ── */
+.pin-disp{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--w1);border:0.5px solid var(--bd);transition:all .2s}
+.pin-dot.filled{background:var(--tl);border-color:var(--tl)}
+/* ── biometric ── */
+.bio-frame{width:88px;height:88px;border:2px solid var(--tl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:36px;background:rgba(29,158,117,0.1);cursor:pointer;transition:all .2s}
+.bio-frame:hover{background:rgba(29,158,117,0.2)}
+.fp-frame{width:80px;height:80px;border:2px solid var(--tl);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:34px;background:rgba(29,158,117,0.1);cursor:pointer;transition:all .2s}
+.fp-frame:hover{background:rgba(29,158,117,0.2)}
+/* ── bank list ── */
+.bank-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--w1);border:0.5px solid var(--bd);border-radius:9px;margin-bottom:7px;cursor:pointer;transition:all .13s}
+.bank-item:hover,.bank-item.sel{background:var(--tllt);border-color:var(--tlbd)}
+.b-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.b-name{font-size:12px;font-weight:600;color:#fff}
+.b-acc{font-size:10px;color:var(--w4);margin-top:2px}
+/* ── withdrawal ── */
+.amt-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.amt-btn{padding:10px;background:var(--w1);border:0.5px solid var(--bd);border-radius:7px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;text-align:center;transition:all .13s}
+.amt-btn:hover{background:var(--tllt);border-color:var(--tlbd)}
+.amt-disp{background:rgba(0,0,0,0.3);border:0.5px solid var(--bd);border-radius:7px;padding:10px 13px;font-size:20px;font-weight:700;color:#fff;min-height:46px;margin-bottom:8px;text-align:right;font-family:monospace}
+.limit-row{display:flex;justify-content:space-between;font-size:9.5px;color:var(--w4);margin-bottom:9px}
+/* ── cheque ── */
+.leaf-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.leaf-opt{padding:15px 8px;background:var(--w1);border:0.5px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;transition:all .13s}
+.leaf-opt:hover,.leaf-opt.sel{background:var(--tllt);border-color:var(--tlbd)}
+.leaf-num{font-size:22px;font-weight:700;color:#fff}
+.leaf-lbl{font-size:10px;color:var(--w4);margin-top:3px}
+/* ── statement ── */
+.date-inp{background:var(--w1);border:0.5px solid var(--bd);border-radius:7px;color:#fff;padding:9px 11px;font-size:11px;width:100%;outline:none;font-family:monospace}
+.date-inp:focus{border-color:var(--tl)}
+.del-opts{display:flex;gap:6px;margin-bottom:10px}
+.del-opt{flex:1;padding:9px 4px;background:var(--w1);border:0.5px solid var(--bd);border-radius:7px;font-size:10px;font-weight:600;color:var(--w4);cursor:pointer;text-align:center}
+.del-opt:hover,.del-opt.sel{background:var(--tllt);border-color:var(--tlbd);color:var(--tltx)}
+/* ── receipt ── */
+.rcpt-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.07);font-size:11px}
+.rcpt-row:last-child{border-bottom:none}
+.rl{color:var(--w4);flex-shrink:0;padding-right:8px}
+.rv{color:#fff;font-weight:600;text-align:right;word-break:break-all}
+.ref-box{background:rgba(0,0,0,0.22);border:0.5px solid var(--tlbd);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--tltx);text-align:center;margin-bottom:10px;font-family:monospace;letter-spacing:.5px}
+.badge-ok{background:var(--tllt);color:var(--tltx);font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600;border:0.5px solid var(--tlbd)}
+.badge-q{background:var(--bllt);color:var(--bltx);font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600;border:0.5px solid var(--blbd)}
+/* ── misc ── */
+.err-banner{background:var(--rdlt);border:0.5px solid var(--rdbd);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--rdtx);margin-bottom:10px;line-height:1.55}
+.warn-banner{background:var(--amlt);border:0.5px solid var(--ambd);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--amtx);margin-bottom:10px;line-height:1.55}
+.info-banner{background:var(--bllt);border:0.5px solid var(--blbd);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--bltx);margin-bottom:10px;line-height:1.55}
+.suc-ring{width:56px;height:56px;border-radius:50%;background:var(--tllt);border:2px solid var(--tl);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;font-weight:700;color:var(--tltx)}
+.loader{width:46px;height:46px;border:3px solid rgba(255,255,255,0.08);border-top-color:var(--tl);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+.prog-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-top:10px}
+.prog-fill{height:100%;background:var(--tl);border-radius:2px;transition:width .4s}
+.prog-lbl{font-size:9px;color:var(--w4);text-align:right;margin-top:4px}
+.lock-icon{font-size:40px;margin:0 auto 14px;display:block;text-align:center}
+.section-lbl{font-size:9.5px;color:var(--w4);margin-bottom:6px;margin-top:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=password]{background:var(--w1);border:0.5px solid var(--bd);border-radius:7px;color:#fff;padding:9px 11px;font-size:12px;width:100%;outline:none;font-family:monospace}
+input[type=text]:focus,input[type=password]:focus{border-color:var(--tl)}
+input::placeholder{color:rgba(255,255,255,0.22)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.scanning{animation:pulse .8s ease-in-out infinite}
+/* ── captcha ── */
+.cap-box{background:rgba(255,255,255,0.04);border:0.5px solid var(--bd);border-radius:8px;padding:12px;text-align:center;margin-bottom:10px}
+.cap-code{font-size:24px;font-weight:700;color:var(--tltx);letter-spacing:9px;font-family:monospace}
+/* ── thank you screen ── */
+.ty-msg{font-size:16px;font-weight:700;color:var(--tltx);text-align:center;line-height:1.6;margin-bottom:16px;padding:16px;background:var(--tllt);border:0.5px solid var(--tlbd);border-radius:10px}
+/* ── scrollbar ── */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="root">
+
+  <!-- ════ MOBILE PHONE PANEL ════ -->
+  <div class="phone">
+    <div class="ph-notch"><div class="ph-bar"></div></div>
+    <div class="ph-status">
+      <span class="ph-numtxt" id="ph-num">+91 ——————</span>
+      <span class="ph-icons">▶ ⬤ ▮▮▮</span>
+    </div>
+    <div class="ph-body">
+      <div class="ph-apphdr">UniBank Messages</div>
+      <div class="ph-feed" id="sms-feed">
+        <div class="ph-empty">
+          <div class="ph-empty-ico">📱</div>
+          <div>OTPs &amp; passcodes sent during your session appear here</div>
+        </div>
+      </div>
+    </div>
+    <div class="ph-audit" id="audit-log">[ Audit log ]</div>
+  </div>
+
+  <!-- ════ ATM PANEL ════ -->
+  <div class="atm">
+    <div class="atm-hdr">
+      <span class="atm-logo">UniBank ATM</span>
+      <div class="atm-meta">
+        <select class="lang-sel" id="lang-sel" onchange="setLang(this.value)">
+          <option value="en">English</option>
+          <option value="ta">தமிழ்</option>
+          <option value="hi">हिन्दी</option>
+          <option value="te">తెలుగు</option>
+        </select>
+        <span class="atm-step-lbl" id="hdr-step">Step 1 / 11</span>
+      </div>
+    </div>
+    <div class="idle-bar"><div class="idle-fill" id="idle-fill" style="width:100%"></div></div>
+    <div class="atm-body">
+
+      <!-- ── S1: Mobile Entry ── -->
+      <div id="s1" class="scr on">
+        <div class="steps" id="ds1"></div>
+        <div class="atm-t" id="lbl-welcome">Welcome</div>
+        <div class="atm-s" id="lbl-entermob">Enter your registered mobile number</div>
+        <div class="card">
+          <div class="disp" id="mob-disp">_ _ _ _ _ _ _ _ _ _</div>
+          <div id="err1"></div>
+          <div class="numpad" id="np1"></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn bs" style="flex:1" onclick="clrMob()">Clear</button>
+            <button class="btn bp" style="flex:2" onclick="goMob()" id="lbl-continue">Continue</button>
+          </div>
+        </div>
+        <p style="font-size:9px;color:var(--w4);margin-top:11px;text-align:center">
+          Demo numbers: 9876543210 · 9123456789 · 9000000001 · 9111222333
+        </p>
+      </div>
+
+      <!-- ── S2: Primary Auth Mode Selection ── -->
+      <div id="s2" class="scr">
+        <div class="steps" id="ds2"></div>
+        <div class="atm-t">Primary Authentication</div>
+        <div class="atm-s">Choose your verification method to proceed</div>
+        <div class="card">
+          <div class="auth-grid">
+            <div class="auth-opt" onclick="pickAuth(this,'passcode','primary')">
+              <span class="auth-ico">🔐</span>
+              <div class="auth-lbl">Passcode</div>
+              <div class="auth-sub">2-digit · 3 options</div>
+            </div>
+            <div class="auth-opt" onclick="pickAuth(this,'captcha','primary')">
+              <span class="auth-ico">🤖</span>
+              <div class="auth-lbl">CAPTCHA</div>
+              <div class="auth-sub">Image verification</div>
+            </div>
+            <div class="auth-opt" onclick="pickAuth(this,'otp','primary')">
+              <span class="auth-ico">💬</span>
+              <div class="auth-lbl">OTP</div>
+              <div class="auth-sub">6-digit SMS code</div>
+            </div>
+            <div class="auth-opt" onclick="pickAuth(this,'fingerprint','primary')">
+              <span class="auth-ico">👆</span>
+              <div class="auth-lbl">Fingerprint</div>
+              <div class="auth-sub">Biometric scan</div>
+            </div>
+          </div>
+          <div class="auth-opt" style="margin-top:7px" onclick="pickAuth(this,'face','primary')">
+            <span class="auth-ico">🪪</span>
+            <div class="auth-lbl">Facial Recognition</div>
+            <div class="auth-sub">Camera-based identification</div>
+          </div>
+          <div class="info-banner" style="margin-top:10px;margin-bottom:0">
+            ⚠ Biometric modes (Fingerprint, Face) require ATM hardware support.
+          </div>
+          <button class="btn bp" style="margin-top:10px" onclick="goToAuth('primary')">Proceed</button>
+          <button class="btn bs" onclick="gt(1)">Back</button>
+        </div>
+      </div>
+
+      <!-- ── S3a: Passcode (3-option select) ── -->
+      <div id="s3p" class="scr">
+        <div class="steps" id="ds3p"></div>
+        <div class="atm-t">Passcode verification</div>
+        <div class="atm-s">Select the 2-digit passcode sent to <span id="mob-masked" style="color:var(--tltx)"></span></div>
+        <div class="card">
+          <div class="timer-row">
+            <span class="t-label">Time remaining</span>
+            <div class="t-bar"><div class="t-fill" id="pc-tbar" style="width:100%;background:var(--tl)"></div></div>
+            <span class="t-num" id="pc-tnum" style="color:var(--tltx)">60</span>
+          </div>
+          <div class="rdots" id="pc-rdots"></div>
+          <p style="font-size:10px;color:var(--w4);text-align:center;margin-bottom:10px">Select the correct passcode from below:</p>
+          <div class="pc-opts" id="pc-opts"></div>
+          <div id="err-pc"></div>
+        </div>
+      </div>
+
+      <!-- ── S3b: CAPTCHA (Primary) ── -->
+      <div id="s3cap" class="scr">
+        <div class="steps" id="ds3cap"></div>
+        <div class="atm-t">CAPTCHA Verification</div>
+        <div class="atm-s">Type the characters shown below to verify you are human</div>
+        <div class="card">
+          <div class="timer-row">
+            <span class="t-label">Time remaining</span>
+            <div class="t-bar"><div class="t-fill" id="cap-tbar" style="width:100%;background:var(--tl)"></div></div>
+            <span class="t-num" id="cap-tnum" style="color:var(--tltx)">60</span>
+          </div>
+          <div class="rdots" id="cap-rdots"></div>
+          <div class="cap-box" id="cap-box" style="position:relative;user-select:none">
+            <div class="cap-code" id="cap-code" style="text-shadow:1px 1px 3px rgba(0,0,0,0.4)"></div>
+            <div style="font-size:9px;color:var(--w4);margin-top:6px">Case-sensitive</div>
+          </div>
+          <button class="btn bs" style="margin-bottom:8px;padding:6px" onclick="refreshCaptcha('primary')">🔄 Refresh CAPTCHA</button>
+          <input type="text" id="cap-input" placeholder="Enter CAPTCHA" maxlength="6" autocomplete="off" style="margin-bottom:8px">
+          <div id="err-cap"></div>
+          <button class="btn bp" onclick="chkCaptcha('primary')">Verify CAPTCHA</button>
+          <button class="btn bs" onclick="gt(2)">Change method</button>
+        </div>
+      </div>
+
+
+      <!-- ── S3c: OTP ── -->
+      <div id="s3otp" class="scr">
+        <div class="steps" id="ds3otp"></div>
+        <div class="atm-t">OTP verification</div>
+        <div class="atm-s">6-digit OTP sent to <span id="otp-masked" style="color:var(--tltx)"></span></div>
+        <div class="card">
+          <div class="timer-row">
+            <span class="t-label">OTP expires in</span>
+            <div class="t-bar"><div class="t-fill" id="otp-tbar" style="width:100%;background:var(--tl)"></div></div>
+            <span class="t-num" id="otp-tnum" style="color:var(--tltx)">60</span>
+          </div>
+          <div class="otp-row" id="otp-row"></div>
+          <div id="err-otp"></div>
+          <button class="btn bp" onclick="chkOTP()">Verify OTP</button>
+          <button class="btn bs" onclick="gt(2)">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S3d: Fingerprint ── -->
+      <div id="s3fp" class="scr">
+        <div class="steps" id="ds3fp"></div>
+        <div class="atm-t">Fingerprint scan</div>
+        <div class="atm-s">Place your registered finger on the sensor</div>
+        <div class="card" style="text-align:center">
+          <div class="fp-frame" id="fp-frame" onclick="bioScan('fp')">👆</div>
+          <p style="font-size:11px;color:var(--w4);margin-bottom:14px">Tap the sensor icon to simulate scan</p>
+          <div class="info-banner" style="margin-bottom:10px">Hardware biometric — simulated for demo</div>
+          <div id="err-fp"></div>
+          <button class="btn bp" onclick="chkBio('fp')">Verify</button>
+          <button class="btn bs" onclick="gt(2)">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S3e: Face ID ── -->
+      <div id="s3face" class="scr">
+        <div class="steps" id="ds3face"></div>
+        <div class="atm-t">Facial recognition</div>
+        <div class="atm-s">Look directly at the ATM camera</div>
+        <div class="card" style="text-align:center">
+          <div class="bio-frame" id="face-frame" onclick="bioScan('face')">🙂</div>
+          <p style="font-size:11px;color:var(--w4);margin-bottom:14px">Tap the face icon to simulate camera scan</p>
+          <div class="info-banner" style="margin-bottom:10px">Hardware biometric — simulated for demo</div>
+          <div id="err-face"></div>
+          <button class="btn bp" onclick="chkBio('face')">Verify</button>
+          <button class="btn bs" onclick="gt(2)">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S2b: Secondary Auth Mode Selection ── -->
+      <div id="s2b" class="scr">
+        <div class="steps" id="ds2b"></div>
+        <div class="atm-t">Secondary Authentication</div>
+        <div class="atm-s">Verify your identity again to proceed with the transaction</div>
+        <div class="card">
+          <div class="auth-grid">
+            <div class="auth-opt" onclick="pickAuth(this,'passcode','secondary')">
+              <span class="auth-ico">🔐</span>
+              <div class="auth-lbl">Passcode</div>
+              <div class="auth-sub">2-digit · 3 options</div>
+            </div>
+            <div class="auth-opt" onclick="pickAuth(this,'captcha','secondary')">
+              <span class="auth-ico">🤖</span>
+              <div class="auth-lbl">CAPTCHA</div>
+              <div class="auth-sub">Image verification</div>
+            </div>
+            <div class="auth-opt" onclick="pickAuth(this,'otp','secondary')">
+              <span class="auth-ico">💬</span>
+              <div class="auth-lbl">OTP</div>
+              <div class="auth-sub">6-digit SMS code</div>
+            </div>
+            <div class="auth-opt" onclick="pickAuth(this,'fingerprint','secondary')">
+              <span class="auth-ico">👆</span>
+              <div class="auth-lbl">Fingerprint</div>
+              <div class="auth-sub">Biometric scan</div>
+            </div>
+          </div>
+          <div class="auth-opt" style="margin-top:7px" onclick="pickAuth(this,'face','secondary')">
+            <span class="auth-ico">🪪</span>
+            <div class="auth-lbl">Facial Recognition</div>
+            <div class="auth-sub">Camera-based identification</div>
+          </div>
+          <div class="info-banner" style="margin-top:10px;margin-bottom:0">
+            ⚠ Biometric modes (Fingerprint, Face) require ATM hardware support.
+          </div>
+          <button class="btn bp" style="margin-top:10px" onclick="goToAuth('secondary')">Proceed</button>
+          <button class="btn bs" onclick="gt(5)">Back to menu</button>
+        </div>
+      </div>
+
+      <!-- ── S3p2: Passcode (Secondary) ── -->
+      <div id="s3p2" class="scr">
+        <div class="steps" id="ds3p2"></div>
+        <div class="atm-t">Secondary Passcode Verification</div>
+        <div class="atm-s">Select the 2-digit passcode sent to <span id="mob-masked2" style="color:var(--tltx)"></span></div>
+        <div class="card">
+          <div class="timer-row">
+            <span class="t-label">Time remaining</span>
+            <div class="t-bar"><div class="t-fill" id="pc2-tbar" style="width:100%;background:var(--tl)"></div></div>
+            <span class="t-num" id="pc2-tnum" style="color:var(--tltx)">60</span>
+          </div>
+          <div class="rdots" id="pc2-rdots"></div>
+          <p style="font-size:10px;color:var(--w4);text-align:center;margin-bottom:10px">Select the correct passcode from below:</p>
+          <div class="pc-opts" id="pc2-opts"></div>
+          <div id="err-pc2"></div>
+        </div>
+      </div>
+
+      <!-- ── S3cap2: CAPTCHA (Secondary) ── -->
+      <div id="s3cap2" class="scr">
+        <div class="steps" id="ds3cap2"></div>
+        <div class="atm-t">Secondary CAPTCHA Verification</div>
+        <div class="atm-s">Type the characters shown below to confirm your transaction</div>
+        <div class="card">
+          <div class="timer-row">
+            <span class="t-label">Time remaining</span>
+            <div class="t-bar"><div class="t-fill" id="cap2-tbar" style="width:100%;background:var(--tl)"></div></div>
+            <span class="t-num" id="cap2-tnum" style="color:var(--tltx)">60</span>
+          </div>
+          <div class="rdots" id="cap2-rdots"></div>
+          <div class="cap-box" id="cap2-box" style="position:relative;user-select:none">
+            <div class="cap-code" id="cap2-code" style="text-shadow:1px 1px 3px rgba(0,0,0,0.4)"></div>
+            <div style="font-size:9px;color:var(--w4);margin-top:6px">Case-sensitive</div>
+          </div>
+          <button class="btn bs" style="margin-bottom:8px;padding:6px" onclick="refreshCaptcha('secondary')">🔄 Refresh CAPTCHA</button>
+          <input type="text" id="cap2-input" placeholder="Enter CAPTCHA" maxlength="6" autocomplete="off" style="margin-bottom:8px">
+          <div id="err-cap2"></div>
+          <button class="btn bp" onclick="chkCaptcha('secondary')">Verify CAPTCHA</button>
+          <button class="btn bs" onclick="gt('2b')">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S3otp2: OTP (Secondary) ── -->
+      <div id="s3otp2" class="scr">
+        <div class="steps" id="ds3otp2"></div>
+        <div class="atm-t">Secondary OTP Verification</div>
+        <div class="atm-s">6-digit OTP sent to <span id="otp2-masked" style="color:var(--tltx)"></span></div>
+        <div class="card">
+          <div class="timer-row">
+            <span class="t-label">OTP expires in</span>
+            <div class="t-bar"><div class="t-fill" id="otp2-tbar" style="width:100%;background:var(--tl)"></div></div>
+            <span class="t-num" id="otp2-tnum" style="color:var(--tltx)">60</span>
+          </div>
+          <div class="otp-row" id="otp2-row"></div>
+          <div id="err-otp2"></div>
+          <button class="btn bp" onclick="chkOTP2()">Verify OTP</button>
+          <button class="btn bs" onclick="gt('2b')">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S3fp2: Fingerprint (Secondary) ── -->
+      <div id="s3fp2" class="scr">
+        <div class="steps" id="ds3fp2"></div>
+        <div class="atm-t">Secondary Fingerprint Scan</div>
+        <div class="atm-s">Place your registered finger on the sensor to confirm</div>
+        <div class="card" style="text-align:center">
+          <div class="fp-frame" id="fp2-frame" onclick="bioScan2('fp')">👆</div>
+          <p style="font-size:11px;color:var(--w4);margin-bottom:14px">Tap the sensor icon to simulate scan</p>
+          <div class="info-banner" style="margin-bottom:10px">Hardware biometric — simulated for demo</div>
+          <div id="err-fp2"></div>
+          <button class="btn bp" onclick="chkBio2('fp')">Verify</button>
+          <button class="btn bs" onclick="gt('2b')">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S3face2: Face ID (Secondary) ── -->
+      <div id="s3face2" class="scr">
+        <div class="steps" id="ds3face2"></div>
+        <div class="atm-t">Secondary Facial Recognition</div>
+        <div class="atm-s">Look directly at the ATM camera to confirm</div>
+        <div class="card" style="text-align:center">
+          <div class="bio-frame" id="face2-frame" onclick="bioScan2('face')">🙂</div>
+          <p style="font-size:11px;color:var(--w4);margin-bottom:14px">Tap the face icon to simulate camera scan</p>
+          <div class="info-banner" style="margin-bottom:10px">Hardware biometric — simulated for demo</div>
+          <div id="err-face2"></div>
+          <button class="btn bp" onclick="chkBio2('face')">Verify</button>
+          <button class="btn bs" onclick="gt('2b')">Change method</button>
+        </div>
+      </div>
+
+      <!-- ── S4: Bank Selection ── -->
+      <div id="s4" class="scr">
+        <div class="steps" id="ds4"></div>
+        <div class="atm-t">Select your bank</div>
+        <div class="atm-s">All banks linked to your mobile number</div>
+        <div class="card">
+          <div id="bank-list"></div>
+          <button class="btn bp" onclick="confBank()">Confirm bank</button>
+        </div>
+      </div>
+
+      <!-- ── S5: Transaction Menu ── -->
+      <div id="s5" class="scr">
+        <div class="steps" id="ds5"></div>
+        <div class="atm-t">Select transaction</div>
+        <div class="atm-s" id="acct-info"></div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+            <div class="txn-tile" onclick="pickTxn('withdraw')">
+              <div style="font-size:22px">💵</div>
+              <div style="font-size:11px;font-weight:600;color:#fff;margin-top:6px">Cash Withdrawal</div>
+            </div>
+            <div class="txn-tile" onclick="pickTxn('cheque')">
+              <div style="font-size:22px">📔</div>
+              <div style="font-size:11px;font-weight:600;color:#fff;margin-top:6px">Cheque Leaf</div>
+            </div>
+            <div class="txn-tile" onclick="pickTxn('balance')">
+              <div style="font-size:22px">💰</div>
+              <div style="font-size:11px;font-weight:600;color:#fff;margin-top:6px">Balance Enquiry</div>
+            </div>
+            <div class="txn-tile" onclick="pickTxn('statement')">
+              <div style="font-size:22px">📋</div>
+              <div style="font-size:11px;font-weight:600;color:#fff;margin-top:6px">Account Statement</div>
+            </div>
+          </div>
+          <button class="btn bd2" onclick="endSess()">Exit session</button>
+        </div>
+      </div>
+
+      <!-- ── S6a: Cash Withdrawal ── -->
+      <div id="s6w" class="scr">
+        <div class="steps" id="ds6w"></div>
+        <div class="atm-t">Cash withdrawal</div>
+        <div class="atm-s">Quick select or enter custom amount</div>
+        <div class="card">
+          <div class="amt-btns">
+            <div class="amt-btn" onclick="setAmt(500)">₹500</div>
+            <div class="amt-btn" onclick="setAmt(1000)">₹1,000</div>
+            <div class="amt-btn" onclick="setAmt(2000)">₹2,000</div>
+            <div class="amt-btn" onclick="setAmt(5000)">₹5,000</div>
+            <div class="amt-btn" onclick="setAmt(10000)">₹10,000</div>
+            <div class="amt-btn" onclick="setAmt(20000)">₹20,000</div>
+          </div>
+          <div class="amt-disp" id="amt-disp">₹ 0</div>
+          <div class="limit-row">
+            <span>Min: ₹500</span>
+            <span>Max: ₹50,000</span>
+            <span style="color:var(--tltx)">Avail: ₹<span id="bal-show"></span></span>
+          </div>
+          <div id="err-amt"></div>
+          <div class="numpad" id="np-amt"></div>
+          <button class="btn bp" onclick="confWithdraw()">Confirm withdrawal</button>
+          <button class="btn bs" onclick="gt(5)">Back</button>
+        </div>
+      </div>
+
+      <!-- ── S6b: Cheque Leaf ── -->
+      <div id="s6c" class="scr">
+        <div class="steps" id="ds6c"></div>
+        <div class="atm-t">Cheque leaf request</div>
+        <div class="atm-s">Select number of leaves required</div>
+        <div class="card">
+          <div class="leaf-opts" id="leaf-opts">
+            <div class="leaf-opt" onclick="selLeaf(this,10)"><div class="leaf-num">10</div><div class="leaf-lbl">leaves</div></div>
+            <div class="leaf-opt" onclick="selLeaf(this,25)"><div class="leaf-num">25</div><div class="leaf-lbl">leaves</div></div>
+            <div class="leaf-opt" onclick="selLeaf(this,50)"><div class="leaf-num">50</div><div class="leaf-lbl">leaves</div></div>
+            <div class="leaf-opt" onclick="selLeaf(this,100)"><div class="leaf-num">100</div><div class="leaf-lbl">leaves</div></div>
+          </div>
+          <div id="err-leaf"></div>
+          <button class="btn bp" onclick="confCheque()">Confirm request</button>
+          <button class="btn bs" onclick="gt(5)">Back</button>
+        </div>
+      </div>
+
+      <!-- ── S6c: Account Statement ── -->
+      <div id="s6s" class="scr">
+        <div class="steps" id="ds6s"></div>
+        <div class="atm-t">Account statement</div>
+        <div class="atm-s">Specify the date range for your full statement</div>
+        <div class="card">
+          <div class="section-lbl">From date</div>
+          <input type="text" id="dt-from" placeholder="DD/MM/YYYY" maxlength="10" oninput="fmtDate('dt-from')" style="margin-bottom:10px">
+          <div class="section-lbl">To date</div>
+          <input type="text" id="dt-to" placeholder="DD/MM/YYYY" maxlength="10" oninput="fmtDate('dt-to')" style="margin-bottom:10px">
+          <div class="section-lbl">Delivery method</div>
+          <div class="del-opts">
+            <div class="del-opt sel" id="del-email" onclick="selDel('email')">Email</div>
+            <div class="del-opt" id="del-sms" onclick="selDel('sms')">SMS</div>
+            <div class="del-opt" id="del-dl" onclick="selDel('download')">Download</div>
+          </div>
+          <div id="err-stmt"></div>
+          <button class="btn bp" onclick="confStatement()">Request statement</button>
+          <button class="btn bs" onclick="gt(5)">Back</button>
+        </div>
+      </div>
+
+      <!-- ── S6d: Balance ── -->
+      <div id="s6b" class="scr">
+        <div class="steps" id="ds6b"></div>
+        <div class="atm-t">Balance enquiry</div>
+        <div class="atm-s" id="bal-bank-lbl"></div>
+        <div class="card" id="bal-card"></div>
+      </div>
+
+      <!-- ── S7: Processing ── -->
+      <div id="s7" class="scr">
+        <div class="steps" id="ds7"></div>
+        <div class="atm-t">Processing</div>
+        <div class="atm-s">Communicating with bank server…</div>
+        <div class="card" style="text-align:center;padding:26px 16px">
+          <div class="loader"></div>
+          <p style="font-size:11px;color:var(--w4)" id="proc-msg">Initiating secure channel…</p>
+          <div class="prog-bar"><div class="prog-fill" id="proc-bar" style="width:0%"></div></div>
+          <span class="prog-lbl" id="proc-pct">0%</span>
+        </div>
+      </div>
+
+      <!-- ── S8: Thank You / Receipt ── -->
+      <div id="s8" class="scr">
+        <div class="steps" id="ds8"></div>
+        <div class="suc-ring">✓</div>
+        <div class="ty-msg">Thank you for using our ATM services.</div>
+        <div class="card" id="rcpt-card" style="margin-bottom:10px"></div>
+        <div style="display:flex;gap:7px;width:100%">
+          <button class="btn bp" style="flex:1;margin-top:0" onclick="gt(5)">New transaction</button>
+          <button class="btn bd2" style="flex:1;margin-top:0" onclick="endSess()">End session</button>
+        </div>
+      </div>
+
+      <!-- ── S9: Session Terminated ── -->
+      <div id="s9" class="scr">
+        <div class="lock-icon">🔒</div>
+        <div class="atm-t" style="color:var(--rdtx)">Session terminated</div>
+        <div class="atm-s">Your session has been locked for security reasons.</div>
+        <div class="card">
+          <div class="err-banner">Maximum attempts exceeded or session timed out. All pending operations have been cancelled.</div>
+          <p style="font-size:10px;color:var(--w4);text-align:center;margin-bottom:10px">Please contact your bank if this was unexpected.</p>
+          <button class="btn bp" onclick="endSess()">Start new session</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.txn-tile{padding:15px 8px;background:var(--w1);border:0.5px solid var(--bd);border-radius:9px;cursor:pointer;text-align:center;transition:all .13s}
+.txn-tile:hover{background:var(--tllt);border-color:var(--tlbd)}
+</style>
+
+<script>
+/* ══════════ DATA ══════════ */
+var LANGS={
+  en:{welcome:'Welcome',entermob:'Enter your registered mobile number',continue:'Continue'},
+  ta:{welcome:'வரவேற்கிறோம்',entermob:'உங்கள் பதிவு செய்யப்பட்ட மொபைல் எண்ணை உள்ளிடவும்',continue:'தொடரவும்'},
+  hi:{welcome:'स्वागत है',entermob:'अपना पंजीकृत मोबाइल नंबर दर्ज करें',continue:'जारी रखें'},
+  te:{welcome:'స్వాగతం',entermob:'మీ నమోదైన మొబైల్ నంబర్ నమోదు చేయండి',continue:'కొనసాగించండి'}
+};
+
+var BANKS={
+  '9876543210':[
+    {name:'State Bank of India',acct:'XXXX 4521',type:'Savings',bal:42350,color:'#1a4a8a'},
+    {name:'HDFC Bank',acct:'XXXX 8830',type:'Current',bal:185200,color:'#004b87'},
+    {name:'ICICI Bank',acct:'XXXX 1107',type:'Savings',bal:12800,color:'#b02319'}
+  ],
+  '9123456789':[
+    {name:'Axis Bank',acct:'XXXX 6612',type:'Savings',bal:67900,color:'#97144d'},
+    {name:'Kotak Mahindra',acct:'XXXX 3341',type:'Current',bal:320500,color:'#ed1b2f'}
+  ],
+  '9000000001':[
+    {name:'Punjab National Bank',acct:'XXXX 9902',type:'Savings',bal:28100,color:'#1a5276'},
+    {name:'Bank of Baroda',acct:'XXXX 5543',type:'Savings',bal:91750,color:'#f26522'},
+    {name:'Union Bank of India',acct:'XXXX 2271',type:'Current',bal:450000,color:'#003087'}
+  ],
+  '9111222333':[
+    {name:'Yes Bank',acct:'XXXX 7790',type:'Savings',bal:53400,color:'#00aeef'},
+    {name:'Canara Bank',acct:'XXXX 4481',type:'Current',bal:120000,color:'#1e5f2e'}
+  ]
+};
+
+/* ══════════ STATE ══════════ */
+var S={
+  mobile:'',authMode:'',authMode2:'',bank:null,
+  passcode:null,pcOpts:[],passcode2:null,pcOpts2:[],
+  otp:null,otp2:null,captcha:null,captcha2:null,
+  tries:0,tries2:0,maxTries:3,
+  bioScanned:false,bioScanned2:false,
+  leaves:0,amtVal:0,delivery:'email',
+  txn:'',procTitle:'',procDetail:''
+};
+var timerI=null,idleI=null,timerSec=60,idleSec=90;
+var auditLines=[];
+
+/* ══════════ AUDIT ══════════ */
+function alog(msg){
+  var t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  auditLines.push('['+t+'] '+msg);
+  var el=document.getElementById('audit-log');
+  el.textContent=auditLines.slice(-12).join('\n');
+  el.scrollTop=el.scrollHeight;
+}
+
+/* ══════════ SMS PANEL ══════════ */
+function sendSMS(type,code){
+  var feed=document.getElementById('sms-feed');
+  if(feed.querySelector('.ph-empty'))feed.innerHTML='';
+  var b=document.createElement('div');
+  b.className='sms new';
+  var masked=maskMob(S.mobile);
+  var ts=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  var body='';
+  if(type==='passcode'){
+    body='Your ATM session passcode is:<span class="code-big">'+code+'</span>'
+      +'Select this code on the ATM screen. Valid 60 sec. Do not share with anyone.';
+  } else if(type==='otp'){
+    body='Your ATM OTP is:<span class="code-big">'+code+'</span>'
+      +'Valid for 60 seconds. Do not share.';
+  }
+  b.innerHTML='<div class="sms-sender">UniBank ATM</div>'
+    +'<div class="sms-ts">'+ts+' · to '+masked+'</div>'+body;
+  feed.appendChild(b);
+  b.scrollIntoView({behavior:'smooth',block:'end'});
+  document.getElementById('ph-num').textContent='+91 '+S.mobile;
+}
+
+function maskMob(m){
+  if(!m||m.length<6)return m;
+  return 'XXXXXX'+m.slice(-4);
+}
+
+/* ══════════ LANGUAGE ══════════ */
+function setLang(l){
+  var d=LANGS[l]||LANGS.en;
+  document.getElementById('lbl-welcome').textContent=d.welcome;
+  document.getElementById('lbl-entermob').textContent=d.entermob;
+  document.getElementById('lbl-continue').textContent=d.continue;
+}
+
+/* ══════════ IDLE TIMER ══════════ */
+function startIdle(){
+  idleSec=90;
+  clearInterval(idleI);
+  document.getElementById('idle-fill').style.width='100%';
+  document.getElementById('idle-fill').style.background='var(--tl)';
+  idleI=setInterval(function(){
+    idleSec--;
+    var pct=Math.round(idleSec/90*100);
+    var fill=document.getElementById('idle-fill');
+    fill.style.width=pct+'%';
+    fill.style.background=idleSec>30?'var(--tl)':idleSec>10?'var(--am)':'var(--rd)';
+    if(idleSec<=0){clearInterval(idleI);alog('IDLE TIMEOUT – session ended');gt(9)}
+  },1000);
+}
+function resetIdle(){idleSec=90}
+document.addEventListener('click',resetIdle);
+document.addEventListener('keydown',resetIdle);
+
+/* ══════════ STEP NAVIGATION ══════════ */
+var TOTAL_STEPS=11;
+var STEP_MAP={
+  '1':1,'2':2,'3p':3,'3cap':3,'3otp':3,'3fp':3,'3face':3,
+  '4':4,'5':5,'2b':6,'3p2':7,'3cap2':7,'3otp2':7,'3fp2':7,'3face2':7,
+  '6w':8,'6c':8,'6s':8,'6b':8,'7':9,'8':10,'9':11
+};
+function gt(n){
+  document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on')});
+  var el=document.getElementById('s'+n);
+  if(el)el.classList.add('on');
+  var cur=STEP_MAP[String(n)]||1;
+  document.getElementById('hdr-step').textContent='Step '+cur+' / '+TOTAL_STEPS;
+  var ds=document.getElementById('ds'+n);
+  if(ds){
+    ds.innerHTML='';
+    for(var i=1;i<=TOTAL_STEPS;i++){
+      var d=document.createElement('div');
+      d.className='sd'+(i===cur?' on':i<cur?' dn':'');
+      ds.appendChild(d);
+    }
+  }
+  if(n!==9&&n!==7)startIdle();
+}
+
+/* ══════════ MOBILE NUMPAD ══════════ */
+var mobVal='';
+(function(){
+  var np=document.getElementById('np1');
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k){
+    var b=document.createElement('button');
+    b.textContent=k===''?'':k;
+    if(k==='')b.style.visibility='hidden';
+    b.onclick=function(){
+      if(k==='⌫')mobVal=mobVal.slice(0,-1);
+      else if(k!==''&&mobVal.length<10)mobVal+=String(k);
+      renderMobDisp();
+    };
+    np.appendChild(b);
+  });
+})();
+function renderMobDisp(){
+  var d=document.getElementById('mob-disp');
+  var s='';
+  for(var i=0;i<10;i++)s+=(i<mobVal.length?mobVal[i]:'_')+(i<9?' ':'');
+  d.textContent=s;
+}
+function clrMob(){
+  mobVal='';
+  renderMobDisp();
+  document.getElementById('err1').innerHTML='';
+}
+function goMob(){
+  var e=document.getElementById('err1');
+  if(mobVal.length!==10){
+    e.innerHTML='<div class="err-banner">Please enter a valid 10-digit mobile number.</div>';
+    return;
+  }
+  if(!BANKS[mobVal]){
+    e.innerHTML='<div class="err-banner">The entered mobile number is not registered. Please enter a valid registered mobile number.</div>';
+    alog('REJECTED: Unregistered mobile '+mobVal.slice(0,4)+'XXXXXX');
+    return;
+  }
+  S.mobile=mobVal;
+  alog('Mobile validated: XXXXXX'+S.mobile.slice(-4));
+  authSel=null;
+  authSel2=null;
+  S.authMode='';
+  S.authMode2='';
+  document.querySelectorAll('.auth-opt').forEach(function(x){x.classList.remove('sel')});
+  gt(2);
+}
+
+/* ══════════ AUTH MODE ══════════ */
+var authSel=null, authSel2=null;
+function pickAuth(el,mode,context){
+  // deselect only within the relevant auth screen
+  var screenId = context==='secondary' ? 's2b' : 's2';
+  var screen = document.getElementById(screenId);
+  if(screen) screen.querySelectorAll('.auth-opt').forEach(function(x){x.classList.remove('sel')});
+  el.classList.add('sel');
+  if(context==='secondary'){authSel2=el; S.authMode2=mode;}
+  else {authSel=el; S.authMode=mode;}
+}
+function goToAuth(context){
+  var mode = context==='secondary' ? S.authMode2 : S.authMode;
+  if(!mode){alert('Please select an authentication method.');return;}
+  alog((context==='secondary'?'Secondary':'Primary')+' auth mode: '+mode);
+  if(context==='secondary'){
+    S.bioScanned2=false;
+    S.tries2=0;
+    if(mode==='passcode')   setupPasscode2();
+    else if(mode==='captcha')  setupCaptcha('secondary');
+    else if(mode==='otp')      setupOTP2();
+    else if(mode==='fingerprint'){resetBioUI2();gt('3fp2');}
+    else if(mode==='face')      {resetBioUI2();gt('3face2');}
+  } else {
+    if(mode==='passcode')   setupPasscode();
+    else if(mode==='captcha')  setupCaptcha('primary');
+    else if(mode==='otp')      setupOTP();
+    else if(mode==='fingerprint'){S.bioScanned=false;resetBioUI();gt('3fp');}
+    else if(mode==='face')      {S.bioScanned=false;resetBioUI();gt('3face');}
+  }
+}
+
+/* ── CAPTCHA HELPERS ── */
+var CAPTCHA_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+function genCaptchaCode(){
+  var c='';
+  for(var i=0;i<6;i++)c+=CAPTCHA_CHARS[Math.floor(Math.random()*CAPTCHA_CHARS.length)];
+  return c;
+}
+function renderCaptchaCanvas(code,canvasId){
+  var el=document.getElementById(canvasId);
+  if(!el)return;
+  // render using styled spans with slight rotation for realism
+  el.innerHTML='';
+  for(var i=0;i<code.length;i++){
+    var span=document.createElement('span');
+    span.textContent=code[i];
+    var rot=(Math.random()*20-10).toFixed(1);
+    var colors=['#7dd3c0','#85B7EB','#EF9F27','#F09595','#a78bfa','#34d399'];
+    span.style.cssText='display:inline-block;transform:rotate('+rot+'deg);color:'+colors[i%colors.length]+';font-size:24px;font-weight:700;font-family:monospace;letter-spacing:4px;text-shadow:1px 1px 4px rgba(0,0,0,0.5)';
+    el.appendChild(span);
+  }
+}
+function refreshCaptcha(context){
+  var code=genCaptchaCode();
+  if(context==='secondary'){S.captcha2=code;renderCaptchaCanvas(code,'cap2-code');document.getElementById('cap2-input').value='';document.getElementById('err-cap2').innerHTML='';}
+  else{S.captcha=code;renderCaptchaCanvas(code,'cap-code');document.getElementById('cap-input').value='';document.getElementById('err-cap').innerHTML='';}
+  alog('CAPTCHA refreshed ('+context+')');
+}
+function setupCaptcha(context){
+  var code=genCaptchaCode();
+  if(context==='secondary'){
+    S.captcha2=code;S.tries2=0;
+    renderCaptchaCanvas(code,'cap2-code');
+    document.getElementById('cap2-input').value='';
+    document.getElementById('err-cap2').innerHTML='';
+    renderRdots('cap2-rdots',0,S.maxTries);
+    startCountdown('cap2-tbar','cap2-tnum',60,function(){
+      alog('CAPTCHA (secondary) timeout');
+      document.getElementById('err-cap2').innerHTML='<div class="err-banner">Time expired. Session terminated.</div>';
+      setTimeout(function(){gt(9)},1500);
+    });
+    gt('3cap2');
+  } else {
+    S.captcha=code;S.tries=0;
+    renderCaptchaCanvas(code,'cap-code');
+    document.getElementById('cap-input').value='';
+    document.getElementById('err-cap').innerHTML='';
+    renderRdots('cap-rdots',0,S.maxTries);
+    startCountdown('cap-tbar','cap-tnum',60,function(){
+      alog('CAPTCHA (primary) timeout');
+      document.getElementById('err-cap').innerHTML='<div class="err-banner">Time expired. Session terminated.</div>';
+      setTimeout(function(){gt(9)},1500);
+    });
+    gt('3cap');
+  }
+  alog('CAPTCHA sent ('+context+')');
+}
+function chkCaptcha(context){
+  if(context==='secondary'){
+    var entered=(document.getElementById('cap2-input').value||'').trim();
+    if(!entered){document.getElementById('err-cap2').innerHTML='<div class="err-banner">Please enter the CAPTCHA.</div>';return;}
+    if(entered===S.captcha2){
+      clearInterval(timerI);alog('CAPTCHA (secondary) OK');
+      routeToTxnScreen();
+    } else {
+      S.tries2++;
+      alog('Wrong CAPTCHA secondary ('+S.tries2+'/'+S.maxTries+')');
+      renderRdots('cap2-rdots',S.tries2,S.maxTries);
+      if(S.tries2>=S.maxTries){clearInterval(timerI);setTimeout(function(){gt(9)},800);}
+      else{document.getElementById('err-cap2').innerHTML='<div class="err-banner">Incorrect CAPTCHA. '+(S.maxTries-S.tries2)+' attempt(s) remaining.</div>';refreshCaptcha('secondary');}
+    }
+  } else {
+    var entered=(document.getElementById('cap-input').value||'').trim();
+    if(!entered){document.getElementById('err-cap').innerHTML='<div class="err-banner">Please enter the CAPTCHA.</div>';return;}
+    if(entered===S.captcha){
+      clearInterval(timerI);alog('CAPTCHA (primary) OK');
+      loadBanks();
+    } else {
+      S.tries++;
+      alog('Wrong CAPTCHA primary ('+S.tries+'/'+S.maxTries+')');
+      renderRdots('cap-rdots',S.tries,S.maxTries);
+      if(S.tries>=S.maxTries){clearInterval(timerI);setTimeout(function(){gt(9)},800);}
+      else{document.getElementById('err-cap').innerHTML='<div class="err-banner">Incorrect CAPTCHA. '+(S.maxTries-S.tries)+' attempt(s) remaining.</div>';refreshCaptcha('primary');}
+    }
+  }
+}
+
+/* ── PASSCODE (PRIMARY) ── */
+function setupPasscode(){
+  var correct=String(10+Math.floor(Math.random()*90));
+  S.passcode=correct; S.tries=0;
+  var opts=[correct];
+  while(opts.length<3){
+    var r=String(10+Math.floor(Math.random()*90));
+    if(opts.indexOf(r)===-1)opts.push(r);
+  }
+  opts.sort(function(){return Math.random()-.5});
+  S.pcOpts=opts;
+  document.getElementById('mob-masked').textContent=maskMob(S.mobile);
+  renderPcOpts();
+  renderRdots('pc-rdots',S.tries,S.maxTries);
+  sendSMS('passcode',correct);
+  alog('Passcode sent to XXXXXX'+S.mobile.slice(-4));
+  startCountdown('pc-tbar','pc-tnum',60,function(){
+    alog('Passcode timeout');
+    document.getElementById('err-pc').innerHTML='<div class="err-banner">Time expired. Session terminated.</div>';
+    setTimeout(function(){gt(9)},1500);
+  });
+  gt('3p');
+}
+function renderPcOpts(){
+  var c=document.getElementById('pc-opts');c.innerHTML='';
+  S.pcOpts.forEach(function(o){
+    var d=document.createElement('div');
+    d.className='pc-opt';
+    d.innerHTML='<div class="pc-opt-val">'+o+'</div><div class="pc-opt-lbl">Option</div>';
+    d.onclick=function(){chkPasscode(o)};
+    c.appendChild(d);
+  });
+}
+function chkPasscode(val){
+  if(val===S.passcode){
+    clearInterval(timerI);
+    alog('Passcode OK (primary)');
+    loadBanks();
+  } else {
+    S.tries++;
+    alog('Wrong passcode ('+S.tries+'/'+S.maxTries+')');
+    renderRdots('pc-rdots',S.tries,S.maxTries);
+    if(S.tries>=S.maxTries){
+      clearInterval(timerI);
+      alog('Max attempts reached – terminated');
+      setTimeout(function(){gt(9)},800);
+    } else {
+      document.getElementById('err-pc').innerHTML='<div class="err-banner">Incorrect passcode. '+(S.maxTries-S.tries)+' attempt(s) remaining.</div>';
+    }
+  }
+}
+
+/* ── PASSCODE (SECONDARY) ── */
+function setupPasscode2(){
+  var correct=String(10+Math.floor(Math.random()*90));
+  S.passcode2=correct; S.tries2=0;
+  var opts=[correct];
+  while(opts.length<3){
+    var r=String(10+Math.floor(Math.random()*90));
+    if(opts.indexOf(r)===-1)opts.push(r);
+  }
+  opts.sort(function(){return Math.random()-.5});
+  S.pcOpts2=opts;
+  document.getElementById('mob-masked2').textContent=maskMob(S.mobile);
+  renderPcOpts2();
+  renderRdots('pc2-rdots',S.tries2,S.maxTries);
+  sendSMS('passcode',correct);
+  alog('Secondary passcode sent to XXXXXX'+S.mobile.slice(-4));
+  startCountdown('pc2-tbar','pc2-tnum',60,function(){
+    alog('Secondary passcode timeout');
+    document.getElementById('err-pc2').innerHTML='<div class="err-banner">Time expired. Session terminated.</div>';
+    setTimeout(function(){gt(9)},1500);
+  });
+  gt('3p2');
+}
+function renderPcOpts2(){
+  var c=document.getElementById('pc2-opts');c.innerHTML='';
+  S.pcOpts2.forEach(function(o){
+    var d=document.createElement('div');
+    d.className='pc-opt';
+    d.innerHTML='<div class="pc-opt-val">'+o+'</div><div class="pc-opt-lbl">Option</div>';
+    d.onclick=function(){chkPasscode2(o)};
+    c.appendChild(d);
+  });
+}
+function chkPasscode2(val){
+  if(val===S.passcode2){
+    clearInterval(timerI);
+    alog('Passcode OK (secondary)');
+    routeToTxnScreen();
+  } else {
+    S.tries2++;
+    alog('Wrong secondary passcode ('+S.tries2+'/'+S.maxTries+')');
+    renderRdots('pc2-rdots',S.tries2,S.maxTries);
+    if(S.tries2>=S.maxTries){
+      clearInterval(timerI);
+      alog('Max attempts reached – terminated');
+      setTimeout(function(){gt(9)},800);
+    } else {
+      document.getElementById('err-pc2').innerHTML='<div class="err-banner">Incorrect passcode. '+(S.maxTries-S.tries2)+' attempt(s) remaining.</div>';
+    }
+  }
+}
+
+/* ── OTP (PRIMARY) ── */
+var otpCode='';
+function setupOTP(){
+  S.tries=0;
+  otpCode='';
+  for(var i=0;i<6;i++)otpCode+=Math.floor(Math.random()*10);
+  S.otp=otpCode;
+  document.getElementById('otp-masked').textContent=maskMob(S.mobile);
+  var row=document.getElementById('otp-row');row.innerHTML='';
+  for(var j=0;j<6;j++){
+    var inp=document.createElement('input');
+    inp.type='text';inp.className='otp-b';inp.maxLength=1;
+    inp.id='ob'+j;
+    inp.oninput=(function(idx){return function(){
+      var el=document.getElementById('ob'+idx);
+      el.value=el.value.replace(/\D/g,'');
+      if(el.value&&idx<5)document.getElementById('ob'+(idx+1)).focus();
+    }})(j);
+    row.appendChild(inp);
+  }
+  sendSMS('otp',otpCode);
+  alog('OTP sent to XXXXXX'+S.mobile.slice(-4));
+  startCountdown('otp-tbar','otp-tnum',60,function(){
+    alog('OTP timeout');
+    setTimeout(function(){gt(9)},1000);
+  });
+  gt('3otp');
+}
+function chkOTP(){
+  var entered='';
+  for(var i=0;i<6;i++){var e=document.getElementById('ob'+i);entered+=(e?e.value:'');}
+  if(entered.length<6){document.getElementById('err-otp').innerHTML='<div class="err-banner">Please enter the full 6-digit OTP.</div>';return;}
+  if(entered===S.otp){
+    clearInterval(timerI);
+    alog('OTP verified OK (primary)');
+    loadBanks();
+  } else {
+    S.tries++;
+    alog('Wrong OTP ('+S.tries+'/'+S.maxTries+')');
+    if(S.tries>=S.maxTries){clearInterval(timerI);setTimeout(function(){gt(9)},800);}
+    else document.getElementById('err-otp').innerHTML='<div class="err-banner">Incorrect OTP. '+(S.maxTries-S.tries)+' attempt(s) remaining.<br>Check the mobile panel on the left.</div>';
+  }
+}
+
+/* ── OTP (SECONDARY) ── */
+var otpCode2='';
+function setupOTP2(){
+  S.tries2=0;
+  otpCode2='';
+  for(var i=0;i<6;i++)otpCode2+=Math.floor(Math.random()*10);
+  S.otp2=otpCode2;
+  document.getElementById('otp2-masked').textContent=maskMob(S.mobile);
+  var row=document.getElementById('otp2-row');row.innerHTML='';
+  for(var j=0;j<6;j++){
+    var inp=document.createElement('input');
+    inp.type='text';inp.className='otp-b';inp.maxLength=1;
+    inp.id='ob2-'+j;
+    inp.oninput=(function(idx){return function(){
+      var el=document.getElementById('ob2-'+idx);
+      el.value=el.value.replace(/\D/g,'');
+      if(el.value&&idx<5)document.getElementById('ob2-'+(idx+1)).focus();
+    }})(j);
+    row.appendChild(inp);
+  }
+  sendSMS('otp',otpCode2);
+  alog('Secondary OTP sent to XXXXXX'+S.mobile.slice(-4));
+  startCountdown('otp2-tbar','otp2-tnum',60,function(){
+    alog('Secondary OTP timeout');
+    setTimeout(function(){gt(9)},1000);
+  });
+  gt('3otp2');
+}
+function chkOTP2(){
+  var entered='';
+  for(var i=0;i<6;i++){var e=document.getElementById('ob2-'+i);entered+=(e?e.value:'');}
+  if(entered.length<6){document.getElementById('err-otp2').innerHTML='<div class="err-banner">Please enter the full 6-digit OTP.</div>';return;}
+  if(entered===S.otp2){
+    clearInterval(timerI);
+    alog('OTP verified OK (secondary)');
+    routeToTxnScreen();
+  } else {
+    S.tries2++;
+    alog('Wrong secondary OTP ('+S.tries2+'/'+S.maxTries+')');
+    if(S.tries2>=S.maxTries){clearInterval(timerI);setTimeout(function(){gt(9)},800);}
+    else document.getElementById('err-otp2').innerHTML='<div class="err-banner">Incorrect OTP. '+(S.maxTries-S.tries2)+' attempt(s) remaining.<br>Check the mobile panel on the left.</div>';
+  }
+}
+
+/* ── BIOMETRIC (PRIMARY) ── */
+function resetBioUI(){
+  var fp=document.getElementById('fp-frame');
+  var fc=document.getElementById('face-frame');
+  if(fp){fp.textContent='👆';fp.style.borderColor='var(--tl)';fp.style.background='rgba(29,158,117,0.1)';fp.classList.remove('scanning')}
+  if(fc){fc.textContent='🙂';fc.style.borderColor='var(--tl)';fc.style.background='rgba(29,158,117,0.1)';fc.classList.remove('scanning')}
+  document.getElementById('err-fp').innerHTML='';
+  document.getElementById('err-face').innerHTML='';
+}
+function bioScan(type){
+  S.bioScanned=false;
+  var id=type==='fp'?'fp-frame':'face-frame';
+  var el=document.getElementById(id);
+  el.classList.add('scanning');
+  el.textContent='⏳';
+  setTimeout(function(){
+    el.classList.remove('scanning');
+    el.textContent=type==='fp'?'✓':'😊';
+    el.style.background='rgba(29,158,117,0.25)';
+    el.style.borderColor='var(--tltx)';
+    S.bioScanned=true;
+    alog(type==='fp'?'Fingerprint captured':'Face scan captured');
+  },1500);
+}
+function chkBio(type){
+  if(!S.bioScanned){
+    var id='err-'+(type==='fp'?'fp':'face');
+    document.getElementById(id).innerHTML='<div class="err-banner">Please complete the biometric scan first.</div>';
+    return;
+  }
+  alog((type==='fp'?'Fingerprint':'Face')+ ' verification OK (primary, simulated)');
+  loadBanks();
+}
+
+/* ── BIOMETRIC (SECONDARY) ── */
+function resetBioUI2(){
+  var fp=document.getElementById('fp2-frame');
+  var fc=document.getElementById('face2-frame');
+  if(fp){fp.textContent='👆';fp.style.borderColor='var(--tl)';fp.style.background='rgba(29,158,117,0.1)';fp.classList.remove('scanning')}
+  if(fc){fc.textContent='🙂';fc.style.borderColor='var(--tl)';fc.style.background='rgba(29,158,117,0.1)';fc.classList.remove('scanning')}
+  document.getElementById('err-fp2').innerHTML='';
+  document.getElementById('err-face2').innerHTML='';
+}
+function bioScan2(type){
+  S.bioScanned2=false;
+  var id=type==='fp'?'fp2-frame':'face2-frame';
+  var el=document.getElementById(id);
+  el.classList.add('scanning');
+  el.textContent='⏳';
+  setTimeout(function(){
+    el.classList.remove('scanning');
+    el.textContent=type==='fp'?'✓':'😊';
+    el.style.background='rgba(29,158,117,0.25)';
+    el.style.borderColor='var(--tltx)';
+    S.bioScanned2=true;
+    alog(type==='fp'?'Fingerprint (secondary) captured':'Face (secondary) captured');
+  },1500);
+}
+function chkBio2(type){
+  if(!S.bioScanned2){
+    var id='err-'+(type==='fp'?'fp2':'face2');
+    document.getElementById(id).innerHTML='<div class="err-banner">Please complete the biometric scan first.</div>';
+    return;
+  }
+  alog((type==='fp'?'Fingerprint':'Face')+ ' verification OK (secondary, simulated)');
+  routeToTxnScreen();
+}
+
+/* ── GENERIC COUNTDOWN ── */
+function startCountdown(barId,numId,secs,onExpire){
+  clearInterval(timerI);
+  timerSec=secs;
+  document.getElementById(barId).style.width='100%';
+  timerI=setInterval(function(){
+    timerSec--;
+    var pct=Math.round(timerSec/secs*100);
+    var fill=document.getElementById(barId);
+    fill.style.width=pct+'%';
+    fill.style.background=timerSec>15?'var(--tl)':timerSec>5?'var(--am)':'var(--rd)';
+    var num=document.getElementById(numId);
+    num.textContent=timerSec;
+    num.style.color=timerSec>15?'var(--tltx)':timerSec>5?'var(--amtx)':'var(--rdtx)';
+    if(timerSec<=0){clearInterval(timerI);onExpire();}
+  },1000);
+}
+
+/* ── RETRY DOTS ── */
+function renderRdots(id,used,max){
+  var c=document.getElementById(id);if(!c)return;
+  c.innerHTML='';
+  for(var i=0;i<max;i++){
+    var d=document.createElement('div');
+    d.className='rdot'+(i<used?' used':'');
+    c.appendChild(d);
+  }
+}
+
+/* ══════════ BANK SELECTION ══════════ */
+function loadBanks(){
+  var banks=BANKS[S.mobile];
+  var list=document.getElementById('bank-list');list.innerHTML='';
+  banks.forEach(function(b){
+    var d=document.createElement('div');d.className='bank-item';
+    d.innerHTML='<div class="b-icon" style="background:'+b.color+'">'+b.name.slice(0,2).toUpperCase()+'</div>'
+      +'<div style="flex:1"><div class="b-name">'+b.name+'</div><div class="b-acc">'+b.acct+' · '+b.type+'</div></div>';
+    d.onclick=function(){
+      document.querySelectorAll('.bank-item').forEach(function(x){x.classList.remove('sel')});
+      this.classList.add('sel');S.bank=b;
+    };
+    list.appendChild(d);
+  });
+  S.bank=banks[0];list.firstChild.classList.add('sel');
+  gt(4);
+}
+function confBank(){
+  if(!S.bank){alert('Please select a bank.');return;}
+  alog('Bank: '+S.bank.name+' '+S.bank.acct);
+  document.getElementById('acct-info').innerHTML=
+    '<span style="color:var(--tltx)">'+S.bank.name+'</span> · '+S.bank.acct+' · '+S.bank.type;
+  gt(5);
+}
+
+/* ══════════ TRANSACTIONS ══════════ */
+/* Store pending txn, show secondary auth, then route */
+function pickTxn(type){
+  S.txn=type;
+  S.authMode2='';
+  S.bioScanned2=false;
+  authSel2=null;
+  // Reset secondary authentication selection for each new transaction.
+  var s2b=document.getElementById('s2b');
+  if(s2b)s2b.querySelectorAll('.auth-opt').forEach(function(x){x.classList.remove('sel')});
+  if(type==='withdraw'){
+    alog('Cash withdrawal selected – amount entry before secondary authentication');
+    showWithdrawalAmount();
+    return;
+  }
+  alog('Transaction selected: '+type+' – secondary auth required');
+  gt('2b');
+}
+
+/* Show the withdrawal amount screen before asking for the second authentication factor. */
+function showWithdrawalAmount(){
+  document.getElementById('bal-show').textContent=S.bank.bal.toLocaleString('en-IN');
+  S.amtVal=0;amtStr='0';
+  document.getElementById('amt-disp').textContent='₹ 0';
+  document.getElementById('err-amt').innerHTML='';
+  buildNumpad('np-amt',function(k){
+    if(k==='⌫')amtStr=amtStr.length>1?amtStr.slice(0,-1):'0';
+    else if(k!=='')amtStr=(amtStr==='0')?String(k):amtStr+k;
+    S.amtVal=parseInt(amtStr)||0;
+    document.getElementById('amt-disp').textContent='₹ '+S.amtVal.toLocaleString('en-IN');
+    document.getElementById('err-amt').innerHTML='';
+  });
+  gt('6w');
+}
+
+/* Called after secondary auth passes – route to the actual transaction screen */
+function routeToTxnScreen(){
+  var type=S.txn;
+  alog('Secondary auth passed – routing to '+type);
+  if(type==='withdraw'){
+    // The amount has already been confirmed; secondary authentication is complete.
+    startProcessing('Cash Withdrawal','₹'+S.amtVal.toLocaleString('en-IN'));
+  } else if(type==='cheque'){
+    selLeaves=0;
+    document.querySelectorAll('.leaf-opt').forEach(function(x){x.classList.remove('sel')});
+    document.getElementById('err-leaf').innerHTML='';
+    gt('6c');
+  } else if(type==='statement'){
+    S.delivery='email';
+    document.getElementById('dt-from').value='';
+    document.getElementById('dt-to').value='';
+    document.getElementById('err-stmt').innerHTML='';
+    var delMap={'email':'del-email','sms':'del-sms','download':'del-dl'};
+    ['email','sms','download'].forEach(function(d){
+      var el=document.getElementById(delMap[d]);
+      if(el)el.classList.toggle('sel',d==='email');
+    });
+    gt('6s');
+  } else if(type==='balance'){
+    document.getElementById('bal-bank-lbl').textContent=S.bank.name+' · '+S.bank.acct;
+    var c=document.getElementById('bal-card');
+    c.innerHTML='<div class="rcpt-row"><span class="rl">Account</span><span class="rv">'+S.bank.acct+'</span></div>'
+      +'<div class="rcpt-row"><span class="rl">Type</span><span class="rv">'+S.bank.type+'</span></div>'
+      +'<div class="rcpt-row"><span class="rl">Available balance</span><span class="rv" style="color:var(--tltx);font-size:17px">₹ '+S.bank.bal.toLocaleString('en-IN')+'</span></div>'
+      +'<button class="btn bp" style="margin-top:10px" onclick="gt(5)">Back to menu</button>'
+      +'<button class="btn bd2" onclick="endSess()">End session</button>';
+    alog('Balance enquiry: ₹'+S.bank.bal.toLocaleString('en-IN'));
+    gt('6b');
+  }
+}
+
+/* ── WITHDRAWAL ── */
+var amtStr='0';
+function setAmt(a){
+  amtStr=String(a);S.amtVal=a;
+  document.getElementById('amt-disp').textContent='₹ '+a.toLocaleString('en-IN');
+  document.getElementById('err-amt').innerHTML='';
+}
+function confWithdraw(){
+  var e=document.getElementById('err-amt');
+  if(S.amtVal<500){e.innerHTML='<div class="err-banner">Minimum withdrawal amount is ₹500.</div>';return}
+  if(S.amtVal>50000){e.innerHTML='<div class="err-banner">Maximum withdrawal limit is ₹50,000 per transaction.</div>';return}
+  if(S.amtVal>S.bank.bal){e.innerHTML='<div class="err-banner">Insufficient balance. Available: ₹'+S.bank.bal.toLocaleString('en-IN')+'</div>';return}
+  if(S.amtVal%100!==0){e.innerHTML='<div class="err-banner">Amount must be in multiples of ₹100.</div>';return}
+  alog('Withdrawal amount confirmed: ₹'+S.amtVal.toLocaleString('en-IN'));
+  // Ask for the second authentication factor only after the amount is confirmed.
+  S.authMode2='';
+  S.bioScanned2=false;
+  S.tries2=0;
+  authSel2=null;
+  var s2b=document.getElementById('s2b');
+  if(s2b)s2b.querySelectorAll('.auth-opt').forEach(function(x){x.classList.remove('sel')});
+  gt('2b');
+}
+
+/* ── CHEQUE ── */
+var selLeaves=0;
+function selLeaf(el,n){
+  document.querySelectorAll('.leaf-opt').forEach(function(x){x.classList.remove('sel')});
+  el.classList.add('sel');selLeaves=n;
+}
+function confCheque(){
+  if(!selLeaves){document.getElementById('err-leaf').innerHTML='<div class="err-banner">Please select number of leaves.</div>';return}
+  alog('Cheque request: '+selLeaves+' leaves');
+  startProcessing('Cheque Leaf Request',selLeaves+' leaves');
+}
+
+/* ── STATEMENT ── */
+function selDel(t){
+  S.delivery=t;
+  var map={'email':'del-email','sms':'del-sms','download':'del-dl'};
+  ['email','sms','download'].forEach(function(d){
+    var el=document.getElementById(map[d]);
+    if(el)el.classList.toggle('sel',d===t);
+  });
+}
+function fmtDate(id){
+  var el=document.getElementById(id);
+  var v=el.value.replace(/\D/g,'');
+  if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);
+  if(v.length>5)v=v.slice(0,5)+'/'+v.slice(5);
+  el.value=v.slice(0,10);
+}
+function parseDate(str){
+  // expects DD/MM/YYYY
+  var p=str.split('/');
+  if(p.length!==3)return null;
+  var d=parseInt(p[0],10),m=parseInt(p[1],10),y=parseInt(p[2],10);
+  if(isNaN(d)||isNaN(m)||isNaN(y))return null;
+  if(m<1||m>12||d<1||d>31||y<1900||y>2100)return null;
+  var dt=new Date(y,m-1,d);
+  // check date rolled over (e.g. 31/02)
+  if(dt.getDate()!==d||dt.getMonth()!==m-1||dt.getFullYear()!==y)return null;
+  return dt;
+}
+function confStatement(){
+  var fv=document.getElementById('dt-from').value;
+  var tv=document.getElementById('dt-to').value;
+  var e=document.getElementById('err-stmt');
+  e.innerHTML='';
+
+  if(fv.length<10||tv.length<10){
+    e.innerHTML='<div class="err-banner">Please enter valid From and To dates (DD/MM/YYYY).</div>';return;
+  }
+  var fromDt=parseDate(fv);
+  var toDt=parseDate(tv);
+  if(!fromDt){
+    e.innerHTML='<div class="err-banner">From date is invalid. Please use DD/MM/YYYY format.</div>';return;
+  }
+  if(!toDt){
+    e.innerHTML='<div class="err-banner">To date is invalid. Please use DD/MM/YYYY format.</div>';return;
+  }
+
+  // Normalise both to midnight for comparison
+  var today=new Date(); today.setHours(0,0,0,0);
+  fromDt.setHours(0,0,0,0);
+  toDt.setHours(0,0,0,0);
+
+  if(fromDt>today){
+    e.innerHTML='<div class="err-banner">From date cannot be a future date. Please enter a past date.</div>';return;
+  }
+  if(toDt>today){
+    e.innerHTML='<div class="err-banner">To date cannot be a future date. Statements are available only up to today ('+today.toLocaleDateString('en-IN')+').</div>';return;
+  }
+  if(fromDt>=toDt){
+    e.innerHTML='<div class="err-banner">From date must be earlier than To date.</div>';return;
+  }
+
+  // Max look-back: 5 years (standard bank policy)
+  var maxBack=new Date(today);
+  maxBack.setFullYear(maxBack.getFullYear()-5);
+  maxBack.setHours(0,0,0,0);
+  if(fromDt<maxBack){
+    e.innerHTML='<div class="err-banner">Statements are available for the last 5 years only. From date cannot be before '+maxBack.toLocaleDateString('en-IN')+'.</div>';return;
+  }
+
+  // Min range: at least 1 day
+  var diffDays=Math.round((toDt-fromDt)/(1000*60*60*24));
+  alog('Statement: '+fv+' to '+tv+' ('+diffDays+' days) via '+S.delivery);
+  startProcessing('Account Statement',fv+' to '+tv);
+}
+
+/* ══════════ PROCESSING ══════════ */
+var procT=null;
+function startProcessing(title,detail){
+  S.procTitle=title;S.procDetail=detail;
+  document.getElementById('proc-bar').style.width='0%';
+  document.getElementById('proc-pct').textContent='0%';
+  var msgs=['Initiating secure connection…','Authenticating with bank…','Processing request…','Verifying transaction…','Finalising…'];
+  var pct=0,step=0;
+  if(procT)clearInterval(procT);
+  document.getElementById('proc-msg').textContent=msgs[0];
+  gt(7);
+  procT=setInterval(function(){
+    pct+=Math.floor(Math.random()*18)+8;
+    if(pct>=100){pct=100;clearInterval(procT);setTimeout(buildReceipt,350)}
+    step=Math.min(Math.floor(pct/22),msgs.length-1);
+    document.getElementById('proc-bar').style.width=pct+'%';
+    document.getElementById('proc-pct').textContent=pct+'%';
+    document.getElementById('proc-msg').textContent=msgs[step];
+  },480);
+}
+
+/* ══════════ RECEIPT ══════════ */
+function genRef(){return 'TXN'+Date.now().toString(36).toUpperCase().slice(-9)}
+function buildReceipt(){
+  var ref=genRef();
+  var t=S.procTitle;
+  var rows='<div class="ref-box">REF: '+ref+'</div>';
+  rows+='<div class="rcpt-row"><span class="rl">Transaction</span><span class="rv">'+t+'</span></div>';
+  rows+='<div class="rcpt-row"><span class="rl">Bank</span><span class="rv">'+S.bank.name+'</span></div>';
+  rows+='<div class="rcpt-row"><span class="rl">Account</span><span class="rv">'+S.bank.acct+'</span></div>';
+  rows+='<div class="rcpt-row"><span class="rl">Detail</span><span class="rv">'+S.procDetail+'</span></div>';
+  if(t==='Cash Withdrawal'){
+    var nb=S.bank.bal-S.amtVal;
+    rows+='<div class="rcpt-row"><span class="rl">Remaining balance</span><span class="rv" style="color:var(--tltx)">₹ '+nb.toLocaleString('en-IN')+'</span></div>';
+    rows+='<div class="rcpt-row"><span class="rl">Status</span><span class="rv"><span class="badge-ok">Dispensed ✓</span></span></div>';
+  } else if(t==='Account Statement'){
+    rows+='<div class="rcpt-row"><span class="rl">Delivery via</span><span class="rv">'+S.delivery+'</span></div>';
+    rows+='<div class="rcpt-row"><span class="rl">Status</span><span class="rv"><span class="badge-q">Queued ↗</span></span></div>';
+  } else {
+    rows+='<div class="rcpt-row"><span class="rl">Status</span><span class="rv"><span class="badge-ok">Success ✓</span></span></div>';
+  }
+  var now=new Date();
+  rows+='<div class="rcpt-row"><span class="rl">Date &amp; time</span><span class="rv">'+now.toLocaleDateString('en-IN')+' '+now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+'</span></div>';
+  rows+='<div class="rcpt-row"><span class="rl">Primary auth</span><span class="rv">'+S.authMode+'</span></div>';
+  rows+='<div class="rcpt-row"><span class="rl">Secondary auth</span><span class="rv">'+S.authMode2+'</span></div>';
+  document.getElementById('rcpt-card').innerHTML=rows;
+  alog('Receipt issued: '+ref);
+  gt(8);
+}
+
+/* ══════════ GENERIC NUMPAD BUILDER ══════════ */
+function buildNumpad(id,cb){
+  var np=document.getElementById(id);if(!np)return;
+  np.innerHTML='';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k){
+    var b=document.createElement('button');
+    b.textContent=k===''?'':k;
+    if(k==='')b.style.visibility='hidden';
+    b.onclick=function(){cb(k==='⌫'?'⌫':(k===''?'':String(k)))};
+    np.appendChild(b);
+  });
+}
+
+/* ══════════ SESSION END ══════════ */
+function endSess(){
+  clearInterval(timerI);clearInterval(idleI);clearInterval(procT);
+  mobVal='';
+  S={mobile:'',authMode:'',authMode2:'',bank:null,
+     passcode:null,pcOpts:[],passcode2:null,pcOpts2:[],
+     otp:null,otp2:null,captcha:null,captcha2:null,
+     tries:0,tries2:0,maxTries:3,
+     bioScanned:false,bioScanned2:false,
+     leaves:0,amtVal:0,delivery:'email',
+     txn:'',procTitle:'',procDetail:''};
+  amtStr='0';selLeaves=0;
+  renderMobDisp();
+  document.getElementById('err1').innerHTML='';
+  document.getElementById('ph-num').textContent='+91 ——————';
+  document.getElementById('sms-feed').innerHTML='<div class="ph-empty"><div class="ph-empty-ico">📱</div><div>Session ended. Start a new session.</div></div>';
+  document.getElementById('idle-fill').style.width='100%';
+  document.getElementById('idle-fill').style.background='var(--tl)';
+  alog('─── Session ended ───');
+  authSel=null;authSel2=null;
+  document.querySelectorAll('.auth-opt').forEach(function(x){x.classList.remove('sel')});
+  gt(1);
+}
+
+/* ══════════ INIT ══════════ */
+gt(1);
+startIdle();
+alog('System initialised');
+</script>
+</body>
+</html>
